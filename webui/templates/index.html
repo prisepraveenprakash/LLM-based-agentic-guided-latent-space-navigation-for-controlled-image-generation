@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Talk-to-Edit Control Deck</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <main class="shell">
+    <section class="panel">
+      <header class="header">
+        <p class="eyebrow">Facial Editing Console</p>
+        <h1>Talk-to-Edit Control Deck</h1>
+        <p class="subtle">Select an attribute and intensity, then launch an edit pass.</p>
+      </header>
+
+      <form id="edit-form" class="controls">
+        <label for="edit_mode">Mode</label>
+        <select id="edit_mode" name="edit_mode">
+          <option value="wo_dialog" selected>Attribute + Intensity</option>
+          <option value="with_dialog">Dialog (Natural Language)</option>
+        </select>
+
+        <div id="attribute-controls">
+        <label for="attribute">Attribute</label>
+        <select id="attribute" name="attribute" required>
+          {% for item in attributes %}
+          <option value="{{ item.value }}">{{ item.label }}</option>
+          {% endfor %}
+        </select>
+
+        <label for="target_val">Intensity</label>
+        <select id="target_val" name="target_val" required>
+          {% for value in intensities %}
+          <option value="{{ value }}">{{ value }}</option>
+          {% endfor %}
+        </select>
+        </div>
+
+        <div id="dialog-controls" class="dialog-controls" style="display:none;">
+          <label for="dialog_text">Dialog Request</label>
+          <textarea id="dialog_text" name="dialog_text" rows="3" placeholder="Example: Make the bangs slightly longer."></textarea>
+          <p class="upload-hint">One prompt is required. The backend auto-closes the dialog turn safely for web usage.</p>
+        </div>
+
+        <div id="latent-wrap" class="latent-wrap">
+          <label for="latent_index">Dataset Face</label>
+          <select id="latent_index" name="latent_index">
+            {% for idx in face_indices %}
+            <option value="{{ idx }}" {% if idx == 38 %}selected{% endif %}>Face {{ idx }}</option>
+            {% endfor %}
+          </select>
+          <p class="upload-hint">Input Face updates immediately when you choose a dataset face (0-99).</p>
+        </div>
+
+        <button id="run-btn" type="submit">
+          <span class="btn-text">Run Edit</span>
+          <span class="btn-shine"></span>
+        </button>
+      </form>
+
+      <div id="status" class="status idle">Ready</div>
+      <div class="progress" id="progress">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <p class="config-hint">Config (Attribute + Intensity): <code>{{ config_path }}</code></p>
+      <p class="config-hint">Config (Dialog): <code>{{ dialog_config_path }}</code></p>
+    </section>
+
+    <section class="panel preview">
+      <h2>Face Preview</h2>
+      <div class="preview-grid">
+        <div class="preview-box" id="input-wrap">
+          <h3>Input Face</h3>
+          <p class="placeholder" id="input-placeholder">No input face preview yet.</p>
+          <img id="input-image" alt="Input face preview">
+        </div>
+        <div class="preview-box" id="image-wrap">
+          <h3>Edited Face</h3>
+          <p class="placeholder">No result yet. Run an edit to preview output.</p>
+          <img id="result-image" alt="Edited output preview">
+        </div>
+      </div>
+      <pre id="error-log" class="error-log"></pre>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

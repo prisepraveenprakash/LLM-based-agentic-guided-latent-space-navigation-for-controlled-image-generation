@@ -1,0 +1,121 @@
+{
+  "attributes": [
+    {
+      "id": "Bangs",
+      "label": "Bangs",
+      "keywords": ["bangs", "fringe", "forehead"],
+      "positive_keywords": ["add", "more", "strong", "visible"],
+      "negative_keywords": ["remove", "less", "subtle", "clean"],
+      "default_intensity": 3
+    },
+    {
+      "id": "Eyeglasses",
+      "label": "Eyeglasses",
+      "keywords": ["glasses", "eyeglasses", "spectacles"],
+      "positive_keywords": ["add", "wear", "strong", "clear"],
+      "negative_keywords": ["remove", "without", "no", "clean"],
+      "default_intensity": 3
+    },
+    {
+      "id": "No_Beard",
+      "label": "Beard",
+      "keywords": ["beard", "stubble", "facial hair", "clean shave"],
+      "positive_keywords": ["add", "more", "thicker"],
+      "negative_keywords": ["remove", "clean", "shave", "no"],
+      "default_intensity": 4
+    },
+    {
+      "id": "Smiling",
+      "label": "Smiling",
+      "keywords": ["smile", "smiling", "happy", "grin"],
+      "positive_keywords": ["more", "big", "bright", "cheerful"],
+      "negative_keywords": ["less", "neutral", "calm", "serious"],
+      "default_intensity": 3
+    },
+    {
+      "id": "Young",
+      "label": "Young",
+      "keywords": ["young", "younger", "age", "fresh", "youth", "old", "older", "mature", "face"],
+      "positive_keywords": ["more", "strong", "maximum", "fresh"],
+      "negative_keywords": ["older", "mature", "less"],
+      "default_intensity": 3
+    }
+  ],
+
+  "intensity_language": {
+    "ultra_low": [
+      "almost none",
+      "barely visible",
+      "hardly noticeable",
+      "negligible",
+      "near zero",
+      "virtually none",
+      "trace amount",
+      "close to none"
+    ],
+    "very_low": [
+      "very subtle",
+      "faint",
+      "minimal",
+      "just a hint",
+      "slightly visible",
+      "barely there",
+      "soft touch",
+      "very light"
+    ],
+    "low": [
+      "subtle",
+      "light",
+      "soft",
+      "noticeable but light",
+      "low intensity",
+      "gentle",
+      "mild",
+      "light touch"
+    ],
+    "medium": [
+      "moderate",
+      "balanced",
+      "natural",
+      "clearly visible",
+      "normal level",
+      "even",
+      "standard",
+      "well balanced"
+    ],
+    "high": [
+      "strong",
+      "clear",
+      "prominent",
+      "high intensity",
+      "very noticeable",
+      "bold",
+      "defined",
+      "striking"
+    ],
+    "very_high": [
+      "maximum",
+      "extreme",
+      "very strong",
+      "fully applied",
+      "dominant",
+      "intense maximum",
+      "fully visible",
+      "heavy"
+    ]
+  },
+
+  "built_in_statements": [
+    "Statement A: detect the most likely editable attribute from user text.",
+    "Statement B: infer desired intensity using language strength words.",
+    "Statement C: run agentic sweep cycles, score every candidate, and keep top candidate.",
+    "Statement D: report every LLM and agent update to the frontend timeline."
+  ],
+  "max_active_agents": 6,
+  "agent_policy": {
+    "cycles": 2,
+    "first_cycle": [0, 1, 2, 3, 4, 5],
+    "neighbor_window": 1,
+    "edit_timeout_seconds": 90
+  }
+}

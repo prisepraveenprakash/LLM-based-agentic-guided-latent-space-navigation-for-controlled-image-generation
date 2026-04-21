@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic Intensity Nexus</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="mesh"></div>
+  <main class="frame">
+    <section class="hero card">
+      <p class="kicker">LLM BASED AGENTIC CONTROLLED IMAGE GENERATION</p>
+      <h1 class="title">Using Latent Space Navigation</h1>
+      <p class="desc">Type your request. The LLM plans from knowledge base, the agent sweeps image intensities in cycles, and the best candidate is selected with full live trace.</p>
+
+      <form id="run-form" class="run-form">
+        <label for="prompt">Instruction</label>
+        <textarea id="prompt" name="prompt" rows="4" placeholder="Example: make the smile strong but still natural"></textarea>
+        <div class="demo-wrap">
+          <div class="demo-title">Demo LLM Commands (Single-Agent)</div>
+          <div class="demo-list">
+          <button type="button" class="demo-btn" data-prompt="smile strong">
+          smile strong
+          </button>
+          <button type="button" class="demo-btn" data-prompt="eyeglasses subtle">
+          eyeglasses subtle
+          </button>
+         <button type="button" class="demo-btn" data-prompt="bangs moderate">
+          bangs moderate
+          </button>
+          <button type="button" class="demo-btn" data-prompt="beard near zero">
+          beard near zero
+          </button>
+          <button type="button" class="demo-btn" data-prompt="face older strong">
+          face older strong
+          </button>
+          </div>
+        </div>
+
+        <div class="demo-wrap">
+          <div class="demo-title">Demo LLM Commands (Multi-Agent)</div>
+          <div class="demo-list">
+            <!-- 🔹 2 ATTRIBUTES -->
+            <button type="button" class="demo-btn" data-prompt="make smile subtle slightly and add eyeglasses light for a clean look">
+            make smile subtle slightly and add eyeglasses light for a clean look
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="add bangs moderate nicely and remove beard minimal overall">
+            add bangs moderate nicely and remove beard minimal overall
+            </button>
+            <button type="button" class="demo-btn" data-prompt="make face older strong overall and keep smile balanced gently">
+            make face older strong overall and keep smile balanced gently
+            </button>
+
+
+            <!-- 🔹 3 ATTRIBUTES -->
+            <button type="button" class="demo-btn" data-prompt="make smile moderate slightly, add eyeglasses subtle nicely, and remove beard minimal overall">
+            make smile moderate slightly, add eyeglasses subtle nicely, and remove beard minimal overall
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="add bangs balanced gently, make face older strong overall, and keep smile light slightly">
+            add bangs balanced gently, make face older strong overall, and keep smile light slightly
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="remove beard near zero clean look, add eyeglasses clear nicely, and make smile strong overall">
+            remove beard near zero clean look, add eyeglasses clear nicely, and make smile strong overall
+            </button>
+
+
+            <!-- 🔹 4 ATTRIBUTES -->
+            <button type="button" class="demo-btn" data-prompt="make smile moderate slightly, add eyeglasses subtle nicely, remove beard minimal overall, and add bangs light gently">
+            make smile moderate slightly, add eyeglasses subtle nicely, remove beard minimal overall, and add bangs light gently
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="remove beard near zero clean look, add bangs balanced nicely, add eyeglasses clear overall, and make face older strong">
+            remove beard near zero clean look, add bangs balanced nicely, add eyeglasses clear overall, and make face older strong
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="make face older moderate overall, keep smile light gently, add eyeglasses subtle nicely, and reduce beard minimal">
+            make face older moderate overall, keep smile light gently, add eyeglasses subtle nicely, and reduce beard minimal
+            </button>
+
+
+            <!-- 🔹 5 ATTRIBUTES -->
+            <button type="button" class="demo-btn" data-prompt="make smile moderate slightly, add eyeglasses subtle nicely, remove beard minimal overall, add bangs light gently, and make face older moderate">
+            make smile moderate slightly, add eyeglasses subtle nicely, remove beard minimal overall, add bangs light gently, and make face older moderate
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="remove beard near zero clean look, add bangs balanced nicely, add eyeglasses clear overall, make smile strong slightly, and make face older strong">
+            remove beard near zero clean look, add bangs balanced nicely, add eyeglasses clear overall, make smile strong slightly, and make face older strong
+            </button>
+
+            <button type="button" class="demo-btn" data-prompt="make face older strong overall, keep smile subtle gently, add eyeglasses light nicely, reduce beard minimal clean, and add bangs moderate">
+            make face older strong overall, keep smile subtle gently, add eyeglasses light nicely, reduce beard minimal clean, and add bangs moderate
+            </button>
+
+          </div>
+        </div>
+
+        <div class="row">
+          <div id="latent-wrap">
+            <label for="latent-index">Dataset Face Index (0-99)</label>
+            <input id="latent-index" name="latent-index" type="number" min="0" max="99" value="38">
+          </div>
+          <button id="run-btn" type="submit">Launch Agentic Run</button>
+        </div>
+      </form>
+
+      <div class="status-wrap">
+        <div class="progress-wrap">
+          <div class="progress-row">
+            <span>Agentic Progress</span>
+          </div>
+          <progress id="run-progress" value="0" max="100"></progress>
+          <div id="progress-meta" class="progress-meta">Waiting to start...</div>
+        </div>
+      </div>
+
+      <div id="job-state" class="job-state idle">Idle</div>
+    </section>
+
+    <section class="grid-top">
+      <article class="card selected-card">
+        <h2>Selected Dataset Image</h2>
+        <div id="selected-loader" class="selected-loader hidden">
+          <div class="spinner"></div>
+          <div id="selected-loader-text">Loading selected dataset image...</div>
+          <div id="selected-eta" class="loader-eta">ETA: --</div>
+        </div>
+        <div id="selected-empty" class="placeholder">No dataset image selected yet.</div>
+        <img id="selected-image" alt="Selected dataset source image">
+      </article>
+
+      <article class="card timeline-card">
+        <h2>Live LLM + Agent Timeline</h2>
+        <div id="timeline" class="timeline"></div>
+      </article>
+    </section>
+
+    <section class="grid-bottom">
+      <article class="card result-card">
+        <h2>Final Selection</h2>
+        <div id="final-empty" class="placeholder">No completed run yet.</div>
+        <div id="final-results" class="final-results"></div>
+        <img id="final-image" alt="Final selected result">
+        <div id="final-meta" class="meta"></div>
+      </article>
+
+      <article class="card">
+        <h2>Sweeped Candidates</h2>
+        <div id="candidates" class="candidates"></div>
+      </article>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
