@@ -1,15 +1,14 @@
-# Talk-to-Edit (Extended Project)
+# Futuristic Agentic UI
 
-This repository contains the full Talk-to-Edit pipeline plus two web interfaces:
-- the classic web UI (`web_app.py`), and
-- an isolated futuristic multi-agent UI (`futuristic_agentic_ui/`).
+This module is an isolated Flask-based interface for prompt-driven, agentic face editing.
+It lives in `futuristic_agentic_ui/` and reuses the core editing pipeline from the main project.
 
-## What this project does
-- Edits face attributes in StyleGAN latent space.
-- Supports direct attribute editing (no dialog).
-- Supports dialog-based editing from natural language requests.
-- Supports inversion from a real image (optional).
-- Includes an agentic multi-cycle sweep UI that evaluates multiple intensities and selects the best result.
+## What it does
+- Accepts natural-language user prompts (for example: "make the person look younger with a subtle smile").
+- Uses `knowledge_base.json` to infer target attribute(s) and desired intensity.
+- Runs agentic sweep cycles over candidate intensities.
+- Scores each candidate and selects the best output.
+- Streams LLM + agent events to a live frontend timeline.
 
 Supported attributes:
 - `Bangs`
@@ -18,66 +17,27 @@ Supported attributes:
 - `Smiling`
 - `Young`
 
-## Project structure
-- `editing_wo_dialog.py`: CLI attribute editing pipeline.
-- `editing_with_dialog.py`: CLI dialog-driven editing pipeline.
-- `web_app.py`: classic Flask UI (manual attribute controls + dialog mode).
-- `futuristic_agentic_ui/app.py`: isolated futuristic agentic UI.
-- `train.py`: training for field-function models.
-- `editing_quantitative.py`, `quantitative_results.py`: evaluation scripts.
-- `configs/`: train/edit configuration files.
-- `download/`: pretrained models, latent data, and sample real images.
-- `results/`: generated outputs and logs.
+## Module structure
+- `app.py`: Flask app, async job lifecycle, status/event APIs.
+- `agentic_engine.py`: planning, candidate scheduling, scoring, and edit execution.
+- `knowledge_base.json`: attribute keywords, intensity language cues, and agent policy.
+- `templates/index.html`: UI shell.
+- `static/app.js`, `static/styles.css`: frontend behavior and styling.
 
-## Setup
-From project root:
+## Prerequisites
+From project root, install dependencies:
 
 ```powershell
 conda env create -f environment.yml
 conda activate talk_edit
 ```
 
-If you use pip/venv instead of conda, install equivalent dependencies from `environment.yml`.
+Required assets are expected in:
+- `download/pretrained_models/`
+- `download/editing_data/teaser_latent_code.npz.npy`
 
-## Run: Direct attribute editing (CLI)
-
-```powershell
-python editing_wo_dialog.py --opt configs/editing/editing_wo_dialog.yml --attr Smiling --target_val 4 --latent_index 38
-```
-
-Output is saved under:
-- `results/editing_wo_dialog/visualization/`
-
-Optional real-image inversion edit:
-
-```powershell
-python editing_wo_dialog.py --opt configs/editing/editing_wo_dialog.yml --attr Eyeglasses --target_val 3 --input_image download/real_images/annehathaway.png
-```
-
-## Run: Dialog editing (CLI)
-
-```powershell
-python editing_with_dialog.py --opt configs/editing/editing_with_dialog.yml --latent_index 38 --request "make the person look younger"
-```
-
-Output is saved under:
-- `results/dialog_editing/visualization/`
-
-## Run: Classic web UI
-
-```powershell
-python web_app.py
-```
-
-Open:
-- `http://127.0.0.1:7860`
-
-Features:
-- dataset face preview by latent index
-- direct attribute editing
-- dialog-based editing
-
-## Run: Futuristic agentic UI
+## Run
+From project root:
 
 ```powershell
 python futuristic_agentic_ui/app.py
@@ -86,31 +46,25 @@ python futuristic_agentic_ui/app.py
 Open:
 - `http://127.0.0.1:7861`
 
-Features:
-- prompt-driven editing
-- knowledge-base-guided attribute + intensity inference
-- multi-agent / multi-cycle sweep and candidate scoring
-- live event timeline of decisions
+## API overview
+- `POST /api/agentic/start`: start an agentic run.
+- `GET /api/agentic/status/<job_id>`: poll run status, events, progress, and results.
+- `POST /api/agentic/preview/start`: start dataset-face preview generation.
+- `GET /api/agentic/preview/status/<preview_id>`: poll preview job status.
+- `GET /results/<path:filename>`: serve generated result images.
+- `GET /health`: health endpoint.
 
-Agentic outputs are saved under:
+## Outputs
+Generated images are saved under:
 - `results/agentic_runs/`
 
-## Training field models
-Use one of the configs in `configs/train/`.
-
-Example:
-
-```powershell
-python train.py --opt configs/train/field_1024_eyeglasses.yml
-```
-
-## Quantitative evaluation
-
-```powershell
-python quantitative_results.py --attribute Eyeglasses --work_dir results/eval --image_dir results/editing_wo_dialog/visualization --image_num 100
-```
+This includes:
+- dataset preview faces (`dataset_preview_latent_<idx>.png`)
+- per-cycle sweep candidates
+- selected best outputs from each run
 
 ## Notes
-- The repo already expects pretrained checkpoints inside `download/pretrained_models/`.
-- Default configs target latent indices from the teaser latent set (`0-99`).
-- For GPU changes, update `gpu_ids` and device settings in the YAML configs.
+- This UI is isolated from the classic `web_app.py` flow.
+- The module executes edits by calling `editing_wo_dialog.py` internally.
+- Default latent index range is `0-99` (teaser latent dataset).
+- You can tune behavior via `knowledge_base.json` (attribute mapping, intensity language, cycle policy, max active agents).
